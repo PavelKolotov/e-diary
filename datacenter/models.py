@@ -1,6 +1,10 @@
 from django.db import models
 
 
+class MyModel(models.Model):
+    objects = models.Manager()
+
+
 class Schoolkid(models.Model):
     """Ученик."""
     full_name = models.CharField('ФИО', max_length=200)
