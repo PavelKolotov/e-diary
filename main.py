@@ -4,7 +4,7 @@ import random
 from datacenter.models import (Schoolkid, Mark, Chastisement, Lesson, Commendation)
 
 
-comm_text = [
+COMMENDATION_TEXT = [
     'Молодец!',
     'Отлично!',
     'Хорошо!',
@@ -56,10 +56,7 @@ def get_schoolkid(schoolkid_name):
 def fix_marks(schoolkid_name):
     schoolkid = get_schoolkid(schoolkid_name)
     if schoolkid:
-        marks = Mark.objects.filter(schoolkid=schoolkid, points__lt=4)
-        for mark in marks:
-            mark.points = 5
-            mark.save()
+        Mark.objects.filter(schoolkid=schoolkid, points__lt=4).update(points=5)
 
 
 def remove_chastisements(schoolkid_name):
@@ -71,19 +68,17 @@ def remove_chastisements(schoolkid_name):
 def create_commendation(schoolkid_name, lesson_name):
     schoolkid = get_schoolkid(schoolkid_name)
     if schoolkid:
-        lessons = Lesson.objects.filter(
+        lesson = Lesson.objects.filter(
             subject__title=lesson_name,
             group_letter=schoolkid.group_letter,
             year_of_study=schoolkid.year_of_study
-        )
-        if not lessons:
+        ).order_by('?').first()
+        if not lesson:
             print('Уроков по введенному предмету не найдено')
             return
-        else:
-            lesson = random.choice(lessons)
-            commendation_text = random.choice(comm_text)
-            Commendation.objects.create(text=commendation_text, created=lesson.date, schoolkid=schoolkid,
-                                        subject=lesson.subject, teacher=lesson.teacher)
+        commendation_text = random.choice(COMMENDATION_TEXT)
+        Commendation.objects.create(text=commendation_text, created=lesson.date, schoolkid=schoolkid,
+                                    subject=lesson.subject, teacher=lesson.teacher)
 
 
 def main(schoolkid_name, lesson_name):
